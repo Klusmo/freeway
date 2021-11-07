@@ -15,13 +15,15 @@ public class Hud {
     public Stage stage;
     private Viewport viewport;
 
-    private int p1Score, p2Score;
+    public int[] score;
 
     Label p1Label, p2Label;
 
 
     public Hud(SpriteBatch batch){
-        p1Score = p2Score = 0;
+        score = new int[2];
+        score[0] = 0;
+        score[1] = 0;
 
         viewport = new FitViewport(FreeWay.V_WIDTH, FreeWay.V_HEIGHT, new OrthographicCamera());
         stage = new Stage(viewport, batch);
@@ -31,8 +33,8 @@ public class Hud {
         table.setFillParent(true);
 
         Label.LabelStyle style = new Label.LabelStyle( new BitmapFont(), Color.YELLOW);
-        p1Label = new Label(String.format("%02d", p1Score), style);
-        p2Label = new Label(String.format("%02d", p2Score), style);
+        p1Label = new Label(String.format("%02d", score[0]), style);
+        p2Label = new Label(String.format("%02d", score[1]), style);
 
         table.add(p1Label).expandX();
         table.add(p2Label).expandX();
@@ -40,5 +42,9 @@ public class Hud {
         stage.addActor(table);
     }
 
+    public void update() {
+        p1Label.setText(String.format("%02d", score[0]));
+        p2Label.setText(String.format("%02d", score[1]));
+    }
 
 }

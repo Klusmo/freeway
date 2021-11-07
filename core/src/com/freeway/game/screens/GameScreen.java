@@ -2,6 +2,7 @@ package com.freeway.game.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -12,22 +13,22 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.freeway.game.Carro;
 import com.freeway.game.FreeWay;
+import com.freeway.game.Player;
 import com.freeway.game.Scenes.Hud;
 
 public class GameScreen implements Screen {
     private FreeWay game;
-    Texture texture;
+    Texture background;
     private OrthographicCamera camera;
     private Viewport viewport;
     private Hud hud;
     private Array<Carro> carros;
-    private Sprite player1, player2;
+    private Player player1, player2;
 
     public GameScreen(FreeWay game){
         this.game = game;
-        
-        // Background
-        texture = new Texture("Road.png");
+
+        background = new Texture("Road.png");
 
         // Camara && ViewPort
         camera = new OrthographicCamera();
@@ -36,37 +37,44 @@ public class GameScreen implements Screen {
 
         hud = new Hud(game.batch);
 
-
-        // Carros
         carros = new Array<>();
-        carros.add(new Carro(new Texture("Car1.png"), 0,  19, 1));
-        carros.add(new Carro(new Texture("Car2.png"), 0,  36, 2));
-        carros.add(new Carro(new Texture("Car3.png"), 0,  53, 3));
-        carros.add(new Carro(new Texture("Car4.png"), 0,  69, 4));
-        carros.add(new Carro(new Texture("Car5.png"), 0,  84, 5));
-        carros.add(new Carro(new Texture("Car6.png"), 0, 101, -5));
-        carros.add(new Carro(new Texture("Car7.png"), 0, 116, -4));
-        carros.add(new Carro(new Texture("Car8.png"), 0, 133, -3));
-        carros.add(new Carro(new Texture("Car9.png"), 0, 149, -2));
-        carros.add(new Carro(new Texture("Car10.png"), 0, 165, -1));
+        carros.add(new Carro(new Texture( "Car1.png"),   0,  19,  1));
+        carros.add(new Carro(new Texture( "Car2.png"),   0,  36,  2));
+        carros.add(new Carro(new Texture( "Car3.png"),   0,  53,  3));
+        carros.add(new Carro(new Texture( "Car4.png"),   0,  69,  4));
+        carros.add(new Carro(new Texture( "Car5.png"),   0,  84,  5));
+        carros.add(new Carro(new Texture( "Car6.png"), 272, 101, -5));
+        carros.add(new Carro(new Texture( "Car7.png"), 272, 116, -4));
+        carros.add(new Carro(new Texture( "Car8.png"), 272, 133, -3));
+        carros.add(new Carro(new Texture( "Car9.png"), 272, 149, -2));
+        carros.add(new Carro(new Texture("Car10.png"), 272, 165, -1));
 
-        player1 = new Sprite(new Texture("ChickenStop.png"));
-        player1.setPosition(58, 6);
+        // Start em cada thread dos carros
+        for (Carro car: carros) {
+            car.start();
+        }
 
-        player2 = new Sprite(new Texture("ChickenStop.png"));
-        player2.setPosition(200, 6);
+        player1 = new Player(new Texture("ChickenStop.png"),  64, 6, 3, hud, 0);
+        player2 = new Player(new Texture("ChickenStop.png"), 208, 6 , 3, hud, 1);
+        player2.setKeys(Input.Keys.UP, Input.Keys.DOWN);
+
+        player1.start();
+        player2.start();
     }
-
 
     @Override
     public void show() {
 
     }
 
-    public void update(){
-
-        for (Carro car: carros) {
-            car.update();
+    public void handleInput(){
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+            for(Carro car: carros){
+                car.dispose();
+            }
+            player1.dispose();
+            player2.dispose();
+            Gdx.app.exit();
         }
     }
 
@@ -76,22 +84,23 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
-        update();
+        handleInput();
 
         game.batch.begin();
-        game.batch.draw(texture, 0, 0);
 
+        game.batch.draw(background, 0, 0);
+
+        // Draw cars
         for (Carro car: carros) {
             car.sprite.draw(game.batch);
         }
 
-        player1.draw(game.batch);
-        player2.draw(game.batch);
+        player1.sprite.draw(game.batch);
+        player2.sprite.draw(game.batch);
+
 
         game.batch.end();
-
-
-
+        hud.update();
         hud.stage.draw();
     }
 
@@ -119,4 +128,6 @@ public class GameScreen implements Screen {
     public void dispose() {
 
     }
+
+
 }

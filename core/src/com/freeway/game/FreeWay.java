@@ -17,7 +17,14 @@ public class FreeWay extends Game {
 	}
 
 	@Override
+	public void dispose() {
+		super.dispose();
+	}
+
+	@Override
 	public void render () {
 		super.render();
 	}
+
+
 }
