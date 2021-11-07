@@ -1,17 +1,16 @@
 package com.freeway.game.screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.freeway.game.Carro;
+import com.freeway.game.CollisionBuffer;
 import com.freeway.game.FreeWay;
 import com.freeway.game.Player;
 import com.freeway.game.Scenes.Hud;
@@ -25,12 +24,14 @@ public class GameScreen implements Screen {
     private Array<Carro> carros;
     private Player player1, player2;
 
+    private CollisionBuffer collisionP1, collisionP2;
+
     public GameScreen(FreeWay game){
         this.game = game;
 
         background = new Texture("Road.png");
 
-        // Camara && ViewPort
+        // Camera && ViewPort
         camera = new OrthographicCamera();
         camera.position.set(FreeWay.V_WIDTH /2f, FreeWay.V_HEIGHT/2f, 0);
         viewport = new FitViewport(FreeWay.V_WIDTH, FreeWay.V_HEIGHT, camera);
@@ -49,14 +50,19 @@ public class GameScreen implements Screen {
         carros.add(new Carro(new Texture( "Car9.png"), 272, 149, -2));
         carros.add(new Carro(new Texture("Car10.png"), 272, 165, -1));
 
-        // Start em cada thread dos carros
-        for (Carro car: carros) {
-            car.start();
-        }
-
         player1 = new Player(new Texture("ChickenStop.png"),  64, 6, 3, hud, 0);
+        player1.setKeys(Input.Keys.W, Input.Keys.S);
         player2 = new Player(new Texture("ChickenStop.png"), 208, 6 , 3, hud, 1);
         player2.setKeys(Input.Keys.UP, Input.Keys.DOWN);
+
+
+        // Start em cada thread dos carros
+        for (Carro car: carros) {
+            car.registerCollisionBuffer(player1.collisionBuffer);
+            car.registerCollisionBuffer(player2.collisionBuffer);
+
+            car.start();
+        }
 
         player1.start();
         player2.start();
@@ -69,11 +75,6 @@ public class GameScreen implements Screen {
 
     public void handleInput(){
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
-            for(Carro car: carros){
-                car.dispose();
-            }
-            player1.dispose();
-            player2.dispose();
             Gdx.app.exit();
         }
     }
@@ -98,7 +99,6 @@ public class GameScreen implements Screen {
         player1.sprite.draw(game.batch);
         player2.sprite.draw(game.batch);
 
-
         game.batch.end();
         hud.update();
         hud.stage.draw();
@@ -111,7 +111,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-
+        for(Carro car: carros){
+            car.dispose();
+        }
+        player1.dispose();
+        player2.dispose();
     }
 
     @Override
@@ -126,6 +130,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+
 
     }
 
